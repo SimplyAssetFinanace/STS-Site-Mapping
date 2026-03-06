@@ -668,7 +668,14 @@ const ROUTE_COLORS = [
 // ─── SUPABASE CONFIG ───
 const SUPABASE_URL  = 'https://feibvcvjgknrwtejoywd.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlaWJ2Y3ZqZ2tucnd0ZWpveXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3Njk5MzksImV4cCI6MjA4ODM0NTkzOX0.RMjFrw8mMPr-KcYafGZPDp-UoZiAlHGnGOZj4wwHWOk';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: window.localStorage
+  }
+});
 
 // Current user profile — set after login
 let currentUser = null;
@@ -701,6 +708,9 @@ async function doSupabaseLogin() {
   }
 
   currentUser = data.user;
+
+  // Explicitly set session so all subsequent queries are authenticated
+  await sb.auth.setSession(data.session);
 
   // Load profile + permissions
   const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', data.user.id).single();

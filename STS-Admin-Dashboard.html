@@ -317,7 +317,14 @@
 <script>
 const SUPABASE_URL  = 'https://feibvcvjgknrwtejoywd.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlaWJ2Y3ZqZ2tucnd0ZWpveXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3Njk5MzksImV4cCI6MjA4ODM0NTkzOX0.RMjFrw8mMPr-KcYafGZPDp-UoZiAlHGnGOZj4wwHWOk';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: window.localStorage
+  }
+});
 
 // ── AUTH ──
 async function doLogin() {
