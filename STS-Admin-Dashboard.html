@@ -211,6 +211,7 @@
       <button class="tab-btn" onclick="switchTab('leads',this)">📋 Leads</button>
       <button class="tab-btn" onclick="switchTab('blog',this)">✍️ Blog</button>
       <button class="tab-btn" onclick="switchTab('analytics',this)">📊 Analytics</button>
+      <button class="tab-btn" onclick="switchTab('websettings',this)">🌐 Website Settings</button>
     </div>
 
     <!-- TAB: USERS -->
@@ -728,6 +729,65 @@
   </div>
 </div>
 
+    <!-- TAB: WEBSITE SETTINGS -->
+    <div class="tab-panel" id="tab-websettings">
+      <div class="section" style="max-width:700px">
+        <h2 style="font-size:18px;font-weight:700;margin-bottom:24px">🌐 Website Settings</h2>
+
+        <!-- Accent Colour -->
+        <div style="margin-bottom:28px">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--subheading-colour)">Accent Colour</label>
+          <div style="display:flex;align-items:center;gap:12px">
+            <input type="color" id="ws-accent" value="#D40000" style="width:48px;height:48px;border:none;background:none;cursor:pointer;border-radius:8px;padding:2px">
+            <input type="text" id="ws-accent-hex" value="#D40000" placeholder="#D40000" style="width:120px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--font-colour);font-size:13px">
+            <button onclick="saveWSSetting('accent_color', document.getElementById('ws-accent-hex').value)" style="padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">Save</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">Changes the brand colour across the Simply Transport website.</p>
+        </div>
+
+        <!-- Logo URL -->
+        <div style="margin-bottom:28px">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--subheading-colour)">Logo URL</label>
+          <div style="display:flex;gap:10px">
+            <input type="url" id="ws-logo" placeholder="https://..." style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--font-colour);font-size:13px">
+            <button onclick="saveWSSetting('logo_url', document.getElementById('ws-logo').value)" style="padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">Save</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">Paste the URL of your logo image. Upload to Supabase Storage or any image host.</p>
+          <div id="ws-logo-preview" style="margin-top:10px;display:none"><img id="ws-logo-img" src="" style="max-height:60px;border-radius:6px;background:#fff;padding:4px"></div>
+        </div>
+
+        <!-- Fuel Discount Rate -->
+        <div style="margin-bottom:28px">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--subheading-colour)">Fuel Calculator Discount Rate (¢/L)</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="number" id="ws-cpl" min="0" max="50" step="0.1" value="9.5" style="width:120px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--font-colour);font-size:13px">
+            <button onclick="saveWSSetting('fuel_discount_cpl', document.getElementById('ws-cpl').value)" style="padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">Save</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">This is the discount applied in the website's savings calculator.</p>
+        </div>
+
+        <!-- Content Editor -->
+        <div style="margin-bottom:28px">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--subheading-colour)">Content Editor</label>
+          <div style="margin-bottom:10px">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Hero Headline</label>
+            <input type="text" id="ws-hero-headline" placeholder="Fuel Savings for NSW Fleets" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--font-colour);font-size:13px;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:10px">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Hero Subheading</label>
+            <textarea id="ws-hero-sub" rows="2" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--font-colour);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+          <div style="margin-bottom:10px">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">CTA Button Text</label>
+            <input type="text" id="ws-cta-text" placeholder="Book Free 30-Min Consultation" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--font-colour);font-size:13px;box-sizing:border-box">
+          </div>
+          <button onclick="saveWSContent()" style="padding:10px 24px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">Save Content</button>
+        </div>
+
+        <div id="ws-status" style="display:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600"></div>
+      </div>
+    </div>
+
 <div id="toast"></div>
 
 <script>
@@ -749,6 +809,7 @@ function switchTab(name, btn) {
   if (name === 'leads')     loadLeads();
   if (name === 'blog')      loadBlogPosts();
   if (name === 'analytics') loadAnalytics();
+  if (name === 'websettings') loadWSSettings();
 }
 
 // ── AUTH ──
@@ -1597,6 +1658,73 @@ sb.auth.onAuthStateChange((event, session) => {
     });
   }
 });
+
+// ── WEBSITE SETTINGS ──────────────────────────────────────────────────────────
+async function loadWSSettings() {
+  const { data } = await sb.from('sts_site_settings').select('key,value');
+  if (!data) return;
+  const map = Object.fromEntries(data.map(r => [r.key, r.value]));
+
+  if (map.accent_color) {
+    document.getElementById('ws-accent').value     = map.accent_color;
+    document.getElementById('ws-accent-hex').value = map.accent_color;
+  }
+  if (map.logo_url) {
+    document.getElementById('ws-logo').value = map.logo_url;
+    showLogoPreview(map.logo_url);
+  }
+  if (map.fuel_discount_cpl) {
+    document.getElementById('ws-cpl').value = map.fuel_discount_cpl;
+  }
+  if (map.hero_headline)  document.getElementById('ws-hero-headline').value = map.hero_headline;
+  if (map.hero_sub)       document.getElementById('ws-hero-sub').value       = map.hero_sub;
+  if (map.cta_text)       document.getElementById('ws-cta-text').value       = map.cta_text;
+
+  // sync colour picker <-> hex input
+  document.getElementById('ws-accent').addEventListener('input', e => {
+    document.getElementById('ws-accent-hex').value = e.target.value;
+  });
+  document.getElementById('ws-accent-hex').addEventListener('input', e => {
+    if (/^#[0-9a-fA-F]{6}$/.test(e.target.value))
+      document.getElementById('ws-accent').value = e.target.value;
+  });
+  document.getElementById('ws-logo').addEventListener('input', e => showLogoPreview(e.target.value));
+}
+
+function showLogoPreview(url) {
+  if (!url) return;
+  const wrap = document.getElementById('ws-logo-preview');
+  document.getElementById('ws-logo-img').src = url;
+  wrap.style.display = 'block';
+}
+
+async function saveWSSetting(key, value) {
+  const { error } = await sb.from('sts_site_settings')
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  showWSStatus(error ? '✗ ' + error.message : '✓ Saved!', !error);
+}
+
+async function saveWSContent() {
+  const updates = [
+    { key: 'hero_headline', value: document.getElementById('ws-hero-headline').value },
+    { key: 'hero_sub',      value: document.getElementById('ws-hero-sub').value },
+    { key: 'cta_text',      value: document.getElementById('ws-cta-text').value },
+  ].filter(r => r.value.trim());
+
+  if (!updates.length) return;
+  const { error } = await sb.from('sts_site_settings')
+    .upsert(updates.map(r => ({ ...r, updated_at: new Date().toISOString() })), { onConflict: 'key' });
+  showWSStatus(error ? '✗ ' + error.message : '✓ Content saved!', !error);
+}
+
+function showWSStatus(msg, ok) {
+  const el = document.getElementById('ws-status');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = ok ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)';
+  el.style.color = ok ? '#4ade80' : '#f87171';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
 </script>
 </body>
 </html>
