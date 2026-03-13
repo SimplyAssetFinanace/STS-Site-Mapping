@@ -1133,18 +1133,17 @@ function syncFont(family, updatePreview=true) {
 async function handleLogoUpload(input) {
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('logo-status').textContent = 'Uploading…';
-  const ext  = file.name.split('.').pop();
-  const path = `logos/dashboard-logo.${ext}`;
-  const { error } = await sb.storage.from('dashboard-assets').upload(path, file, {upsert:true, contentType:file.type});
-  if (error) { toast('Upload failed: ' + error.message, true); document.getElementById('logo-status').textContent = ''; return; }
-  const { data: urlData } = sb.storage.from('dashboard-assets').getPublicUrl(path);
-  const url = urlData.publicUrl;
-  const prev = document.getElementById('logo-preview');
-  prev.src = url + '?t=' + Date.now(); prev.style.display = 'block';
-  prev.dataset.cleanUrl = url;
-  document.getElementById('logo-status').textContent = 'Uploaded — click Save Branding to apply';
-  toast('Logo uploaded ✓');
+  document.getElementById('logo-status').textContent = 'Processing…';
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result;
+    const prev = document.getElementById('logo-preview');
+    prev.src = base64; prev.style.display = 'block';
+    prev.dataset.cleanUrl = base64;
+    document.getElementById('logo-status').textContent = 'Loaded — click Save Branding to apply';
+    toast('Logo ready ✓');
+  };
+  reader.readAsDataURL(file);
 }
 
 async function saveBranding() {
@@ -1776,17 +1775,18 @@ async function uploadLogo() {
   const file = document.getElementById('ws-logo-file').files[0];
   if (!file) return;
   const btn = document.getElementById('ws-logo-upload-btn');
-  btn.textContent = 'Uploading…';
+  btn.textContent = 'Saving…';
   btn.disabled = true;
-  const ext  = file.name.split('.').pop();
-  const path = `logos/sts-logo.${ext}`;
-  const { error: upErr } = await sb.storage.from('site-assets').upload(path, file, { upsert: true, contentType: file.type });
-  if (upErr) { showWSStatus('✗ Upload failed: ' + upErr.message, false); btn.textContent = 'Upload'; btn.disabled = false; return; }
-  const { data } = sb.storage.from('site-assets').getPublicUrl(path);
-  await saveWSSetting('logo_url', data.publicUrl);
-  showLogoPreview(data.publicUrl);
-  btn.textContent = 'Upload';
-  btn.disabled = false;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result;
+    await saveWSSetting('logo_url', base64);
+    showLogoPreview(base64);
+    btn.textContent = 'Upload';
+    btn.disabled = false;
+    showWSStatus('✓ Logo saved', true);
+  };
+  reader.readAsDataURL(file);
 }
 
 async function saveWSSetting(key, value) {
