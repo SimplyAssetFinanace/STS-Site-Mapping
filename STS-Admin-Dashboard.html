@@ -23,7 +23,7 @@
   .mono, .log-action { font-family:'DM Mono',monospace !important; }
 
   /* TABS */
-  .subnav { display:flex; align-items:center; gap:2px; background:var(--bg2); border-bottom:1px solid rgba(255,255,255,0.06); padding:0 32px; overflow-x:auto; }
+  .subnav { display:flex; align-items:center; gap:2px; background:var(--bg2); border-bottom:1px solid rgba(255,255,255,0.06); padding:0 32px; overflow-x:auto; position:sticky; top:60px; z-index:90; }
   .tab-btn { padding:14px 18px; border:none; border-bottom:2px solid transparent; font-size:13px; font-weight:600; cursor:pointer; background:transparent; color:var(--muted) !important; transition:all 0.2s; white-space:nowrap; border-radius:0; }
   .tab-btn:hover { color:var(--font-colour) !important; }
   .tab-btn.active { color:var(--font-colour) !important; border-bottom-color:var(--primary); }
@@ -55,7 +55,7 @@
   .topbar-user { font-size:13px; color:var(--muted); }
   .btn-signout { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--muted); border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer; transition:all 0.2s; }
   .btn-signout:hover { background:rgba(215,29,40,0.2); color:#ff6b6b; border-color:rgba(215,29,40,0.3); }
-  .main { padding:32px; max-width:1200px; margin:0 auto; }
+  .main { padding:20px 32px 32px; max-width:1200px; margin:0 auto; }
 
   /* STATS */
   .stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:32px; }
@@ -733,9 +733,7 @@
 
     <!-- TAB: WEBSITE SETTINGS -->
     <div class="tab-panel" id="tab-websettings">
-
-      <div id="ws-status" style="display:none;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:20px"></div>
-
+      <div id="ws-status" style="display:none;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:16px"></div>
       <!-- Branding -->
       <div class="section">
         <div class="section-header">
