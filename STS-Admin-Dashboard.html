@@ -1133,15 +1133,18 @@ function syncFont(family, updatePreview=true) {
 async function handleLogoUpload(input) {
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('logo-status').textContent = 'Processing…';
+  document.getElementById('logo-status').textContent = 'Saving…';
   const reader = new FileReader();
   reader.onload = async (e) => {
     const base64 = e.target.result;
     const prev = document.getElementById('logo-preview');
     prev.src = base64; prev.style.display = 'block';
     prev.dataset.cleanUrl = base64;
-    document.getElementById('logo-status').textContent = 'Loaded — click Save Branding to apply';
-    toast('Logo ready ✓');
+    const { error } = await sb.from('dashboard_settings').update({ logo_url: base64 }).eq('id','global');
+    if (error) { toast('Save failed: ' + error.message, true); document.getElementById('logo-status').textContent = ''; return; }
+    document.getElementById('logo-status').textContent = 'Logo saved ✓';
+    toast('Logo saved ✓');
+    loadBrandingOnStart();
   };
   reader.readAsDataURL(file);
 }
