@@ -620,6 +620,96 @@
       </div>
     </div><!-- /tab-analytics -->
 
+    <!-- TAB: WEBSITE SETTINGS -->
+    <div class="tab-panel" id="tab-websettings">
+      <div id="ws-status" style="display:none;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:16px"></div>
+      <!-- Branding -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Branding</div>
+        </div>
+        <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:32px">
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Accent Colour</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <input type="color" id="ws-accent" value="#D40000" style="width:44px;height:44px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;padding:3px;background:transparent">
+              <input type="text" id="ws-accent-hex" value="#D40000" maxlength="7" style="width:90px;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;font-family:'DM Mono',monospace">
+              <button onclick="saveWSSetting('accent_color',document.getElementById('ws-accent-hex').value)" class="btn btn-blue">Save</button>
+            </div>
+            <p style="font-size:12px;color:var(--muted)">Changes the brand colour across the Simply Transport website.</p>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Logo</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;border:1px dashed rgba(255,255,255,0.15);cursor:pointer;background:rgba(255,255,255,0.03);font-size:13px;color:var(--muted);min-width:0">
+                <span>📁</span><span id="ws-logo-filename" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Choose PNG / JPG…</span>
+                <input type="file" id="ws-logo-file" accept="image/*" style="display:none" onchange="handleLogoFile(this)">
+              </label>
+              <button onclick="uploadLogo()" id="ws-logo-upload-btn" style="display:none" class="btn btn-blue">Upload</button>
+            </div>
+            <div id="ws-logo-preview" style="display:none;margin-bottom:8px;padding:8px 12px;background:#fff;border-radius:8px">
+              <img id="ws-logo-img" src="" style="max-height:40px;display:block">
+            </div>
+            <p style="font-size:12px;color:var(--muted)">Upload your logo PNG — stored and applied to the website automatically.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="section" style="margin:0">
+          <div class="section-header">
+            <div class="section-title">Fuel Calculator</div>
+          </div>
+          <div style="padding:24px">
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Discount Rate</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+              <input type="number" id="ws-cpl" min="0" max="50" step="0.1" value="9.5" style="width:100px;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:20px;font-weight:700;text-align:center">
+              <span style="font-size:16px;color:var(--muted);font-weight:600">¢ / litre</span>
+              <button onclick="saveWSSetting('fuel_discount_cpl',document.getElementById('ws-cpl').value)" class="btn btn-blue">Save</button>
+            </div>
+            <p style="font-size:12px;color:var(--muted)">Currently showing <strong id="ws-cpl-display" style="color:var(--primary)">9.5¢/L</strong> in the website calculator.</p>
+          </div>
+        </div>
+        <div class="section" style="margin:0">
+          <div class="section-header">
+            <div class="section-title">Rolling Banner</div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted)">
+              <input type="checkbox" id="ws-banner-enabled" onchange="saveWSSetting('banner_enabled',this.checked?'true':'false')" style="width:16px;height:16px;accent-color:var(--primary)">
+              Enable on website
+            </label>
+          </div>
+          <div style="padding:24px">
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Banner Text</div>
+            <textarea id="ws-banner-text" rows="3" placeholder="🚛 Save up to 9.5¢/L on diesel  •  Free fuel mapping consultation  •  Call 0408 417 870 today"
+                      style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Use  •  to separate items. Scrolls across the top of the website.</p>
+            <button onclick="saveWSContent()" class="btn btn-blue">Save Banner</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Page Content</div>
+          <button onclick="saveWSContent()" class="btn btn-blue">Save All</button>
+        </div>
+        <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Hero Headline</div>
+            <input type="text" id="ws-hero-headline" placeholder="Fuel Savings for NSW Fleets" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">CTA Button Text</div>
+            <input type="text" id="ws-cta-text" placeholder="Book Free 30-Min Consultation" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;box-sizing:border-box">
+          </div>
+          <div style="grid-column:1/-1">
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Hero Subheading</div>
+            <textarea id="ws-hero-sub" rows="2" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-websettings -->
+
   </div>
 </div>
 
@@ -731,105 +821,6 @@
   </div>
 </div>
 
-    <!-- TAB: WEBSITE SETTINGS -->
-    <div class="tab-panel" id="tab-websettings">
-      <div id="ws-status" style="display:none;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:16px"></div>
-      <!-- Branding -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title">Branding</div>
-        </div>
-        <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:32px">
-          <!-- Accent Colour -->
-          <div>
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Accent Colour</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-              <input type="color" id="ws-accent" value="#D40000" style="width:44px;height:44px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;padding:3px;background:transparent">
-              <input type="text" id="ws-accent-hex" value="#D40000" maxlength="7" style="width:90px;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;font-family:'DM Mono',monospace">
-              <button onclick="saveWSSetting('accent_color',document.getElementById('ws-accent-hex').value)" class="btn btn-blue">Save</button>
-            </div>
-            <p style="font-size:12px;color:var(--muted)">Changes the brand colour across the Simply Transport website.</p>
-          </div>
-          <!-- Logo Upload -->
-          <div>
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Logo</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-              <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;border:1px dashed rgba(255,255,255,0.15);cursor:pointer;background:rgba(255,255,255,0.03);font-size:13px;color:var(--muted);min-width:0">
-                <span>📁</span><span id="ws-logo-filename" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Choose PNG / JPG…</span>
-                <input type="file" id="ws-logo-file" accept="image/*" style="display:none" onchange="handleLogoFile(this)">
-              </label>
-              <button onclick="uploadLogo()" id="ws-logo-upload-btn" style="display:none" class="btn btn-blue">Upload</button>
-            </div>
-            <div id="ws-logo-preview" style="display:none;margin-bottom:8px;padding:8px 12px;background:#fff;border-radius:8px;display:inline-flex;align-items:center">
-              <img id="ws-logo-img" src="" style="max-height:40px;display:block">
-            </div>
-            <p style="font-size:12px;color:var(--muted)">Upload your logo PNG — stored and applied to the website automatically.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fuel Calculator + Rolling Banner side by side -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-
-        <!-- Calculator -->
-        <div class="section" style="margin:0">
-          <div class="section-header">
-            <div class="section-title">Fuel Calculator</div>
-          </div>
-          <div style="padding:24px">
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Discount Rate</div>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-              <input type="number" id="ws-cpl" min="0" max="50" step="0.1" value="9.5" style="width:100px;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:20px;font-weight:700;text-align:center">
-              <span style="font-size:16px;color:var(--muted);font-weight:600">¢ / litre</span>
-              <button onclick="saveWSSetting('fuel_discount_cpl',document.getElementById('ws-cpl').value)" class="btn btn-blue">Save</button>
-            </div>
-            <p style="font-size:12px;color:var(--muted)">Currently showing <strong id="ws-cpl-display" style="color:var(--primary)">9.5¢/L</strong> in the website calculator.</p>
-          </div>
-        </div>
-
-        <!-- Rolling Banner -->
-        <div class="section" style="margin:0">
-          <div class="section-header">
-            <div class="section-title">Rolling Banner</div>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted)">
-              <input type="checkbox" id="ws-banner-enabled" onchange="saveWSSetting('banner_enabled',this.checked?'true':'false')" style="width:16px;height:16px;accent-color:var(--primary)">
-              Enable on website
-            </label>
-          </div>
-          <div style="padding:24px">
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Banner Text</div>
-            <textarea id="ws-banner-text" rows="3" placeholder="🚛 Save up to 9.5¢/L on diesel  •  Free fuel mapping consultation  •  Call 0408 417 870 today"
-                      style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
-            <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Use  •  to separate items. Scrolls across the top of the website.</p>
-            <button onclick="saveWSContent()" class="btn btn-blue">Save Banner</button>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Page Content -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title">Page Content</div>
-          <button onclick="saveWSContent()" class="btn btn-blue">Save All</button>
-        </div>
-        <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
-          <div>
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Hero Headline</div>
-            <input type="text" id="ws-hero-headline" placeholder="Fuel Savings for NSW Fleets" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;box-sizing:border-box">
-          </div>
-          <div>
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">CTA Button Text</div>
-            <input type="text" id="ws-cta-text" placeholder="Book Free 30-Min Consultation" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;box-sizing:border-box">
-          </div>
-          <div style="grid-column:1/-1">
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Hero Subheading</div>
-            <textarea id="ws-hero-sub" rows="2" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--font-colour);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
-          </div>
-        </div>
-      </div>
-
-    </div>
 
 <div id="toast"></div>
 
