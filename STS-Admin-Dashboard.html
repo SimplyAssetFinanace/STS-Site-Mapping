@@ -877,6 +877,8 @@ function switchTab(name, btn) {
 }
 
 // ── AUTH ──
+let _currentRole = 'user';
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pw    = document.getElementById('login-pw').value;
@@ -885,12 +887,13 @@ async function doLogin() {
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
   if (error) { err.textContent = error.message; err.style.display = 'block'; return; }
   const { data: profile } = await sb.from('profiles').select('role').eq('id', data.user.id).single();
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || !['admin','user'].includes(profile.role)) {
     await sb.auth.signOut();
-    err.textContent = 'Access denied — admin only.';
+    err.textContent = 'Access denied.';
     err.style.display = 'block';
     return;
   }
+  _currentRole = profile.role;
   showApp(data.user.email);
 }
 
@@ -904,9 +907,23 @@ function showApp(email) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-email').textContent = email;
+  // Hide admin-only tabs for user role
+  const adminTabs = ['users','logs','settings','leads','blog','analytics','websettings'];
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const tab = btn.getAttribute('onclick')?.match(/switchTab\('(\w+)'/)?.[1];
+    if (tab && adminTabs.includes(tab) && _currentRole !== 'admin') {
+      btn.style.display = 'none';
+    }
+  });
   loadBrandingOnStart();
-  loadUsers();
-  loadStats();
+  if (_currentRole === 'admin') { loadUsers(); loadStats(); }
+  // Default to route mapping for user role
+  if (_currentRole !== 'admin') {
+    const routeBtn = document.querySelector('.tab-btn[onclick*="routemap"]');
+    if (routeBtn) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); routeBtn.classList.add('active'); }
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    const rp = document.getElementById('tab-routemap'); if (rp) rp.classList.add('active');
+  }
 }
 
 // ── STATS ──
@@ -1719,7 +1736,10 @@ function toast(msg, isErr=false) {
 sb.auth.onAuthStateChange((event, session) => {
   if (session) {
     sb.from('profiles').select('role').eq('id',session.user.id).single().then(({data}) => {
-      if (data?.role === 'admin') showApp(session.user.email);
+      if (data?.role === 'admin' || data?.role === 'user') {
+        _currentRole = data.role;
+        showApp(session.user.email);
+      }
     });
   }
 });
@@ -1782,20 +1802,44 @@ async function uploadLogo() {
   btn.disabled = true;
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const base64 = e.target.result;
-    await saveWSSetting('logo_url', base64);
-    showLogoPreview(base64);
-    btn.textContent = 'Upload';
-    btn.disabled = false;
-    showWSStatus('✓ Logo saved', true);
+    // Strip white background via canvas so logo renders transparently on site
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i] > 235 && d[i+1] > 235 && d[i+2] > 235) d[i+3] = 0;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      const base64 = canvas.toDataURL('image/png');
+      await saveWSSetting('logo_url', base64);
+      showLogoPreview(base64);
+      btn.textContent = 'Upload';
+      btn.disabled = false;
+      showWSStatus('✓ Logo saved', true);
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
 async function saveWSSetting(key, value) {
-  const { error } = await sb.from('sts_site_settings')
-    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-  showWSStatus(error ? '✗ ' + error.message : '✓ Saved!', !error);
+  try {
+    const r = await fetch('https://simplytransport.vercel.app/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value })
+    });
+    const json = await r.json();
+    showWSStatus(json.ok ? '✓ Saved!' : '✗ ' + (json.error || 'Error'), json.ok);
+  } catch(e) {
+    showWSStatus('✗ ' + e.message, false);
+  }
 }
 
 async function saveWSContent() {
@@ -1805,9 +1849,7 @@ async function saveWSContent() {
     { key: 'cta_text',      value: document.getElementById('ws-cta-text').value },
     { key: 'banner_text',   value: document.getElementById('ws-banner-text').value },
   ];
-  const { error } = await sb.from('sts_site_settings')
-    .upsert(updates.map(r => ({ ...r, updated_at: new Date().toISOString() })), { onConflict: 'key' });
-  showWSStatus(error ? '✗ ' + error.message : '✓ Saved!', !error);
+  await Promise.all(updates.map(u => saveWSSetting(u.key, u.value)));
 }
 
 function showWSStatus(msg, ok) {
