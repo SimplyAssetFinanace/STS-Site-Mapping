@@ -682,8 +682,8 @@ const SIGNATURE_IMG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSU
 // ─── CRYPTO HELPERS (AES-GCM + PBKDF2 — no external libraries) ───
 // ─── SUPABASE AUTH ───
 
-async function doSignOut() {
-  await sb.auth.signOut();
+function doSignOut() {
+  sb.auth.signOut(); // fire-and-forget; login page also clears session
   window.location.replace('/');
 }
 
