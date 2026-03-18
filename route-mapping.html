@@ -342,25 +342,6 @@ hr { border:none; border-top:1px solid var(--border); margin:13px 0; }
 <div class="sidebar">
 <div class="sb-inner" id="main-panel">
 
-  <div class="apibox" id="api-setup-box">
-    <div class="api-title">🔐 Sign In</div>
-    <div id="api-unlock-ui">
-      <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Sign in with your Simply Transport Solutions account.</div>
-      <div class="ig"><span class="ico">✉️</span><input type="email" id="login-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()"></div>
-      <div class="ig"><span class="ico">🔒</span><input type="password" id="login-pw" placeholder="Password…" onkeydown="if(event.key==='Enter')doSupabaseLogin()"></div>
-      <button class="btn btn-secondary" onclick="doSupabaseLogin()">🗺 Sign In &amp; Load Map</button>
-      <div id="login-error" style="margin-top:8px;font-size:.78rem;color:var(--shell-r);display:none"></div>
-      <div id="login-user-info" style="display:none;margin-top:10px;padding:10px;background:var(--off);border-radius:8px;border:1px solid var(--border)">
-        <div style="font-size:.78rem;color:var(--muted)">Signed in as</div>
-        <div style="font-size:.85rem;font-weight:600;color:var(--text)" id="login-user-name"></div>
-        <div style="font-size:.75rem;color:var(--muted)" id="login-user-email"></div>
-        <button class="btn btn-secondary" style="margin-top:8px;font-size:.75rem;padding:5px 10px" onclick="doSignOut()">Sign Out</button>
-      </div>
-    </div>
-  </div>
-
-  <hr>
-
   <div class="lbl">Route</div>
   <div class="ig"><span class="ico">🟢</span><input type="text" id="origin" placeholder="Point A – Origin (suburb, address or postcode)"></div>
   <div class="ig"><span class="ico">🔴</span><input type="text" id="destination" placeholder="Point B – Destination"></div>
@@ -698,95 +679,9 @@ const SIGNATURE_IMG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSU
 // ─── CRYPTO HELPERS (AES-GCM + PBKDF2 — no external libraries) ───
 // ─── SUPABASE AUTH ───
 
-async function doSupabaseLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pw    = document.getElementById('login-pw').value;
-  const errEl = document.getElementById('login-error');
-  errEl.style.display = 'none';
-
-  if (!email || !pw) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = 'block'; return; }
-
-  setStatus('Signing in…', 'ld');
-
-  // Step 1: Authenticate — with 10 second timeout
-  let authData, authError;
-  try {
-    const authPromise = sb.auth.signInWithPassword({ email, password: pw });
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Login timed out. Please try again.')), 10000));
-    const result = await Promise.race([authPromise, timeout]);
-    authData = result.data;
-    authError = result.error;
-  } catch(e) {
-    errEl.textContent = e.message;
-    errEl.style.display = 'block';
-    setStatus('', '');
-    return;
-  }
-
-  if (authError) {
-    errEl.textContent = authError.message;
-    errEl.style.display = 'block';
-    setStatus('', '');
-    return;
-  }
-
-  // Step 2: Set defaults immediately — don't wait for profile
-  currentUser = authData.user;
-  currentProfile = {
-    is_active: true, can_export_pptx: true, can_export_csv: true,
-    can_fuel_pricing: false, export_count: 0, max_exports: null,
-    full_name: email, role: 'user'
-  };
-
-  // Step 3: Show logged-in UI immediately
-  showLoggedIn(email);
-  setStatus('✅ Signed in · Loading profile…', 'ok');
-
-  // Step 4: Fetch profile in background (non-blocking)
-  setTimeout(async () => {
-    try {
-      const { data: profile } = await sb.from('profiles').select('*').eq('id', authData.user.id).single();
-      if (profile) {
-        if (!profile.is_active) {
-          await sb.auth.signOut();
-          location.reload();
-          return;
-        }
-        currentProfile = profile;
-        applyPermissions(profile);
-        document.getElementById('login-user-name').textContent = profile.full_name || email;
-        sb.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', authData.user.id).then(()=>{});
-        sb.from('usage_logs').insert({ user_id: authData.user.id, email, action: 'login', detail: 'Signed in' }).then(()=>{});
-      }
-      setStatus(`✅ ${typeof SHELL_SITES_RAW !== 'undefined' ? SHELL_SITES_RAW.length + ' Shell sites ready' : 'Map ready'}`, 'ok');
-    } catch(e) {
-      console.warn('Profile load failed:', e);
-      setStatus('✅ Signed in', 'ok');
-    }
-  }, 500);
-}
-
-function showLoggedIn(email) {
-  document.getElementById('login-user-name').textContent = email;
-  document.getElementById('login-user-email').textContent = email;
-  document.getElementById('login-email').closest('.ig').style.display = 'none';
-  document.getElementById('login-pw').closest('.ig').style.display = 'none';
-  document.querySelector('[onclick="doSupabaseLogin()"]').style.display = 'none';
-  document.getElementById('login-user-info').style.display = 'block';
-  applyPermissions(currentProfile);
-}
-
 async function doSignOut() {
   await sb.auth.signOut();
-  currentUser = null; currentProfile = null;
-  document.getElementById('login-email').closest('.ig').style.display = '';
-  document.getElementById('login-pw').closest('.ig').style.display = '';
-  document.querySelector('[onclick="doSupabaseLogin()"]').style.display = '';
-  document.getElementById('login-user-info').style.display = 'none';
-  document.getElementById('login-error').style.display = 'none';
-  setStatus('Signed out', '');
-  // Reload page to reset map state
-  setTimeout(() => location.reload(), 800);
+  window.location.replace('/');
 }
 
 function applyPermissions(profile) {
@@ -803,27 +698,15 @@ window.addEventListener('DOMContentLoaded', () => {
   initMap(MAPS_API_KEY);
 });
 
-// Auto-restore session on page load
+// Restore session on page load
 sb.auth.onAuthStateChange(async (event, session) => {
   if (session && !currentUser) {
-    document.getElementById('login-email').value = session.user.email;
-    document.getElementById('login-pw').value = '________'; // dummy to pass validation
     currentUser = session.user;
     const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
     if (profile && profile.is_active) {
       currentProfile = profile;
       applyPermissions(profile);
       loadTGPData();
-      document.getElementById('login-user-name').textContent = profile.full_name || session.user.email;
-      document.getElementById('login-user-email').textContent = session.user.email;
-      document.getElementById('login-email').closest('.ig').style.display = 'none';
-      document.getElementById('login-pw').closest('.ig').style.display = 'none';
-      document.querySelector('[onclick="doSupabaseLogin()"]').style.display = 'none';
-      document.getElementById('login-user-info').style.display = 'block';
-      let hf = document.getElementById('api-key');
-      if (!hf) { hf = document.createElement('input'); hf.type='hidden'; hf.id='api-key'; document.body.appendChild(hf); }
-      hf.value = MAPS_API_KEY;
-      initMap(MAPS_API_KEY);
     }
   }
 });
