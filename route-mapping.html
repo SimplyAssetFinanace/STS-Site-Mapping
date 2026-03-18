@@ -304,6 +304,8 @@ hr { border:none; border-top:1px solid var(--border); margin:13px 0; }
 .fps-avg-bar { margin-top:8px; display:flex; align-items:center; gap:8px; font-size:.73rem; }
 .fps-avg-track { flex:1; height:5px; background:rgba(255,255,255,.1); border-radius:3px; overflow:hidden; }
 .fps-avg-fill { height:100%; background:var(--shell-y); border-radius:3px; transition:width .5s; }
+.logout-btn { background:rgba(215,29,40,0.15); border:1px solid rgba(215,29,40,0.4); border-radius:7px; color:#f87171; font-size:.78rem; font-weight:600; font-family:'DM Sans',sans-serif; padding:6px 14px; cursor:pointer; transition:background .2s,color .2s; white-space:nowrap; }
+.logout-btn:hover { background:rgba(215,29,40,0.35); color:#fff; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -332,6 +334,7 @@ hr { border:none; border-top:1px solid var(--border); margin:13px 0; }
   <div class="hdr-right">
     <span class="sites-badge" id="site-count-badge">205 Sites</span>
     <a class="contact-pill" href="tel:0408417870">📞 0408 417 870</a>
+    <button class="logout-btn" onclick="doSignOut()" title="Sign out">Sign Out</button>
   </div>
 </header>
 
